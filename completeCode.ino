@@ -36,13 +36,18 @@ float ib = 0.0;
 float vm = 0.0;
 float vb = 0.0;
 
+float im2 = 0.0;
+float ib2 = 0.0;
+float vm2 = 0.0;
+float vb2 = 0.0;
+
 float imF = 0.0;
 float ibF = 0.0;
 float vmF = 0.0;
 float vbF = 0.0;
 
-float currentm=0.0;
-float currentb=0.0;
+float currentm = 0.0;
+float currentb = 0.0;
 
 
 #define channelPinA 2
@@ -78,24 +83,23 @@ void setup() {
   Timer3.attachInterrupt(batterySensorRead).setFrequency(300).start();
   Timer5.attachInterrupt(motorSensorRead).setFrequency(300).start();
   Timer4.attachInterrupt(throttle).setFrequency(300).start();
-
-  attachInterrupt(digitalPinToInterrupt(channelPinA), doEncodeA, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(channelPinB), doEncodeB, CHANGE);
+  Timer6.attachInterrupt (doEncode).setFrequency(1000).start();
 }
 
 void loop() {
+  Serial.println(" "); //salto de linea porque la lista del final no lo tiene
   //filtering
 
-  filteredBvoltage.Filter(vb);
+  filteredBvoltage.Filter(vb2);
   vbF = filteredBvoltage.Current();
 
-  filteredBvoltage.Filter(ib);
+  filteredBvoltage.Filter(ib2);
   ibF = filteredBcurrent.Current();
 
-  filteredMcurrent.Filter(im);
+  filteredMcurrent.Filter(im2);
   imF = filteredMcurrent.Current();
 
-  filteredMvoltage.Filter(vm);
+  filteredMvoltage.Filter(vm2);
   vmF = filteredMvoltage.Current();
 
   //RPM calculation
@@ -114,7 +118,7 @@ void loop() {
   }
   delay(500);
   String outRPM = String("Motor velocity   [rpm]: ") + counter;
-  Serial.println(outRPM);
+  //Serial.println(outRPM);
 
 
 
@@ -123,34 +127,41 @@ void loop() {
   //Motor Voltage
 
   float voltagem = map(vmF, 3262, 3200, 0, 5.79);
-  String outVOLM = String("Motor voltage      [V]: ") + vmF;
+  if (vm != 0) {
+    vm2 = vm;
+
+  }
+  String outVOLM = String("Motor voltage      [V]: ") + voltagem;
   //Serial.println(outVOLM);
 
   //Battery Voltage
   float voltageb = map(vbF, 0, 2905, 0, 51.34);
+  if (vb != 0) {
+    vb2 = vb;
+  }
   String outVOLB = String("Battery voltage    [V]: ") + voltageb;
   //Serial.println(outVOLB);
 
-
   //Motor Current
-  float imF2 =map(imF,0,4096,0,3.3);
-  currentm = 0.0042* imF2 +2.624;
-  if(im!=0){
-  temp=im;
-  String outIM = String("Motor current      [A]: ") + im;
-  
-  Serial.println(temp);
-  }  
+  float imF2 = map(imF, 0, 4096, 0, 3.3);
+  currentm = 0.0042 * imF2 + 2.624;
+  if (im != 0) {
+    float im2 = im;
+  }
+  String outIM = String("Motor current      [A]: ") + im2;
+  //Serial.println(outIM);
 
-  
   //Battery current
-  float ibF2 = map(ibF, 0, 4096,0,3.3);
-  currentb=0.0042* ibF2 +2.624;;
-  String outIB = String("Battery current    [A]: ") + ib;
-  //Serial.println(outIB);
+  float ibF2 = map(ibF, 0, 4096, 0, 3.3);
+  currentb = 0.0042 * ibF2 + 2.624;
+  if (ib != 0) {
+    float ib2 = ib;
+  }
+  String outIB = String("Battery current    [A]: ") + ib2;
+  Serial.println(outIB);
 
   //Motor torque
-  torque = 0.0981*currentm + 0.2081;
+  torque = 0.0981 * currentm + 0.2081;
   String outT = String("Motor torque      [Nm]: ") + torque;
   //Serial.println(outT);
 
@@ -177,14 +188,14 @@ void loop() {
   pmot = voltagem * currentm;
   pbatt = voltageb * currentb;
 
-  float list[] = { voltageb, voltagem, currentm, currentb, torque, throttle, rpm, vel, pmec, pmot, pbatt };
+  String list[] = { String(voltageb), String(voltagem), String(currentm), String(currentb), String(torque), String(throttle), String(rpm), String(vel), String(pmec), String(pmot), String(pbatt) };
   //Serial.print(String(list[2]) + "," + String(list[3]) + "," + String(list[1]) + "," + String(list[4]) + "," + String(list[7]) + "," + String(list[6]) + "," + String(list[5]) + "," + String(list[8]) + "," + String(list[9]) + "," + String(list[10]) + "," String(list[11]));
+  Serial.print(list[1]+","+list[2]+","+list[3]+","+list[4]+","+list[5]+","+list[6]+","+list[7]+","+list[8]+","+list[9]+","+list[10]+","+list[11]);
 }
 
 
 void motorSensorRead() {
   im = analogRead(currentSensor);
-
   vm = analogRead(voltageSensor);
 }
 
@@ -196,27 +207,19 @@ void throttle() {
   p = analogRead(throttlePedalIn);
 }
 
-void doEncodeA() {
-  if (millis() > timeCounter + timeThreshold) {
-    if (digitalRead(channelPinA) == digitalRead(channelPinB)) {
+void doEncode()
+{
+  if (millis() > timeCounter + timeThreshold)
+  {
+    if (digitalRead(channelPinA) == digitalRead(channelPinB))
+    {
       IsCW = true;
-      ISRCounter--;
-    } else {
-      IsCW = false;
-      ISRCounter++;
+      if (ISRCounter + 1 <= maxSteps) ISRCounter++;
     }
-    timeCounter = millis();
-  }
-}
-
-void doEncodeB() {
-  if (millis() > timeCounter + timeThreshold) {
-    if (digitalRead(channelPinA) != digitalRead(channelPinB)) {
-      IsCW = true;
-      ISRCounter--;
-    } else {
+    else
+    {
       IsCW = false;
-      ISRCounter++;
+      if (ISRCounter - 1 > 0) ISRCounter--;
     }
     timeCounter = millis();
   }
