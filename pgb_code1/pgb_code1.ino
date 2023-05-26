@@ -8,7 +8,6 @@ float revolutions = 0;
 int rpm = 0;  // max value 32,767 16 bit
 long startTime = 0;
 long elapsedTime;
-float mrpm;
 float wrpm;
 float vel;
 bool s;
@@ -153,6 +152,8 @@ void loop() {
   pmec = rpm * torque * pi / 30;   //rpm turned into rad/s
   pmot = voltagem * currentm;      // P = V*I
   pbatt = voltageb * currentb;     // ... same
+  wrpm = (rpm/60)*(2*pi)           // angular velocity in rad/s
+  vel = wrpm*(0.14)                // wheel diameter 28cm, linear velocity wr
   //With this list we send the data packet to the raspberry pi
   String list[] = { String(voltageb), String(voltagem), String(currentm), String(currentb), String(torque), String(throttle), String(rpm), String(vel), String(pmec), String(pmot), String(pbtt)};
   // list[11] invokes the ancient ones so please do not use it 
@@ -185,5 +186,4 @@ void doEncode()
     ISRCounter--;
   }
   timeCounter = millis();
-
 }
