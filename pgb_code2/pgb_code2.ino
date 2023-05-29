@@ -115,25 +115,19 @@ void loop() {
 
   delay(500);
   String outRPM1 = String("Motor velocity en[rpm]: ") + wmF;
-  Serial.println(outRPM1);
+  //Serial.println(outRPM1);
 
   //Motor RPM
   rpm = voltagem * kv;
   String outRPM2 = String("Motor velocity vm[rpm]: ") + rpm;
-  Serial.println(outRPM2);
-
-
-
-  //filtering
-
-
-
+  //Serial.println(outRPM2);
+  //Signal aquisition and filtering
   //Motor Voltage
 
   voltagem = map(vmF, 0, 4096, 0, 3.33);
   voltagem = -20.571 * voltagem + 55.76; // assigns the voltage value to the adc lecture
   String outVOLM = String("Motor voltage      [V]: ") + voltagem;
-  Serial.println(outVOLM);
+  //Serial.println(outVOLM);
 
   SUM2 = SUM2 - READINGS2[INDEX2]; // Remove the oldest entry from the sum
   READINGS2[INDEX2] = vm; // Add the newest reading to the window
@@ -198,6 +192,18 @@ void loop() {
   wrpm = (wm / 60) * (2 * pi);     // angular velocity in rad/s
   pmec = (wrpm * pi / 30) * torque ;  //rpm turned into rad/s
   vel = wrpm * (0.14);              // wheel diameter 28cm, linear velocity wr
+
+  // comparacion 
+  Serial.println(wm);
+  Serial.println(wmF);
+  /*Serial.println(ib);
+  Serial.println(ibF);
+  Serial.println(vb);
+  Serial.println(vbF);
+  Serial.println(im);
+  Serial.println(imF);
+  Serial.println(vm);
+  Serial.println(vmF);*/
 
   //With this list we send the data packet to the raspberry pi
   String list[] = { String(voltageb), String(voltagem), String(currentm), String(currentb), String(torque), String(throttle), String(wm), String(vel), String(pmec), String(pmot), String(pbatt)};
