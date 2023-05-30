@@ -126,7 +126,6 @@ void loop() {
   delay(500);
   String outRPM1 = String("Motor velocity en[rpm]: ") + wmF;
 
-
   Serial.print(vmF);
   //Serial.print(",");
   //Serial.println(wm);
@@ -135,18 +134,14 @@ void loop() {
   rpm = voltagem * kv;
   String outRPM2 = String("Motor velocity vm[rpm]: ") + rpm;
   //Serial.println(outRPM2);
-
-
-
-  //filtering
-
-
+  //Signal aquisition and filtering
   //Motor Voltage
 
   vmF2 = vmF * 0.0008056641;
   voltagem = -20.571 * voltagem + 55.76; // assigns the voltage value to the adc lecture
   String outVOLM = String("Motor voltage      [V]: ") + voltagem;
 
+  //Serial.println(outVOLM);
 
   SUM2 = SUM2 - READINGS2[INDEX2]; // Remove the oldest entry from the sum
   READINGS2[INDEX2] = vm; // Add the newest reading to the window
@@ -229,6 +224,7 @@ void loop() {
     Serial.println(outP2);
     Serial.println(outP3);
   */
+
   //With this list we send the data packet to the raspberry pi
   String list[] = { String(voltageb), String(voltagem), String(currentm), String(currentb), String(torque), String(throttle), String(wm), String(vel), String(pmec), String(pmot), String(pbatt)};
   // list[11] invokes the ancient ones so please do not use it
