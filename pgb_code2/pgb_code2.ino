@@ -123,6 +123,7 @@ void loop() {
 
     temporal = ISRCounter * 60000; //(millis()-timeold);
     wm = float(temporal / ((millis() - timeold) * 96.0)); // aqui esta |
+    wm=wm/4.5;
     timeold = millis();
     ISRCounter = 0;
   }
@@ -138,7 +139,7 @@ void loop() {
 
   wrpm = wmF * pi / (30 / 1.24137);
   vel = wrpm * 0.14;
-  mrpm=wm*1.5;
+  mrpm=(wm*1.5);
 
 
 
