@@ -3,10 +3,6 @@ import pandas as pd
 from sqlalchemy import create_engine
 from datetime import datetime
 
-Gled = 7
-Yled = 11
-Oled = 13
-Rled = 15
 data_list = []
 
 engine = create_engine('postgresql://postgres:(CIMB2023)@proyectosanti.postgres.database.azure.com:5432/postgres')
